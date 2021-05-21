@@ -1,0 +1,39 @@
+h2{
+    text-align: center;
+}
+
+.user-input{
+    display: flex;
+    padding: 20px 50px 20px 50px;
+}
+
+.start-input{
+    width: 50%;
+    text-align: center;
+    font-size: 50px;
+}
+
+#starttime{
+    height: 50px;
+    width: 70px;
+}
+
+.finish-input{
+    width: 50%;
+    text-align: center;
+    font-size: 50px;
+}
+
+#endtime{
+    height: 50px;
+    width: 70px;
+}
+.submit-area{
+    width: 50%;
+    margin: auto;
+    
+}
+
+#submit-button{
+    width: 50%
+}

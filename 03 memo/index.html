@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MemoPad</title>
+    <!-- <link rel="stylesheet" href="css/style.css"> -->
+    <!-- 課題提出後にcss作成 -->
+    
+</head>
+<body>
+    <h2>プログラミング出勤簿</h2>
+    <form name="time-keeper">
+        <div class="user-input" >
+           <div class="start-input">
+                <p>開始時間</p>
+                <input type="time" id="starttime">
+            </div>  
+            <div class="finish-input">
+                <p>終了時間</p>
+                <input type="time" id="endtime">
+            </div> 
+        </div>
+        <div class="submit-area">        
+            <input type="submit" value="記録" id="submit-button">
+        </div>
+        
+        <p>今回の勉強時間</p>
+        <input type="text" id="elapsetime"> 
+    </form>
+    <button id="clear-button">記録をクリア</button>
+    <br>
+    <br>
+    <table id="list">本日勉強ログ</table>
+    <br>
+    <table id="list-2">今日の合計勉強時間</table>
+    
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+    <script>
+
+        $(function(){
+            $('#submit-button').click(function(){
+                const starttime= $('#starttime').val();
+                const endtime= $('#endtime').val();
+                const elapsetime= calElapseTime(starttime, endtime)     
+                $("#elapsetime").val(elapsetime);
+                localStorage.setItem(starttime,endtime);               
+
+                const html = '<tr><th>'+'開始時間'+starttime+'</th><td>'+'終了時間'+endtime+'</td><td>'+'勉強時間'+elapsetime+'分'+'</td></tr>';
+                $("#list").append(html);
+                return false;
+
+// JSONで挫折したところ
+                // let valueobj = {
+                //     memo1: endtime,
+                //     memo2: elapsetime,
+                //  };
+
+                //  console.log(valueobj); 
+                //  var json = JSON.stringify(valueObj);
+                //  const json_text = localStorage.setItem("starttime", json);              
+                               
+            });    
+
+            function calElapseTime(starttime, endtime){
+                const startms = timeStringToMs(starttime);           
+                let endms = timeStringToMs(endtime);
+                const elapseMs = endms - startms;
+                const studytime = parseFloat(elapseMs)/60000;           
+                return (studytime);                         
+            }
+            
+            // 分を時刻に変換する
+            // function msToTimeString(ms) {
+            //     const hour = Math.floor(ms / 3600000);
+            //     const minute = Math.floor((ms - 3600000 * hour) / 60000);
+            //     const hh = ("00" + hour).slice(-2);
+            //     const mm = ("00" + minute).slice(-2);
+            //     return `${hh}:${mm}`;
+            // }
+
+            // 時刻を分に変換する
+            function timeStringToMs(hhmm) {
+                     let ms = 0;
+                     const ret = hhmm.match(/^([0-1][0-9]|2[0-3]):([0-5][0-9])$/)
+                     if (ret != null) ms = Number(ret[1]) * 3600000 + Number(ret[2]) * 60000;
+                     return ms;
+                }
+
+            $("#clear-button").on("click",function(){    
+                localStorage.clear();
+                $("#list").empty();
+            });
+
+            //localstorageの文を引き出す
+            let sum = 0;
+            for(let i=0; i<localStorage.length; i++){
+                const starttime2   = localStorage.key(i);
+                const endtime2 = localStorage.getItem(starttime2);
+                const elapsetime2 = calElapseTime(starttime2, endtime2)
+                sum = sum + elapsetime2;
+                console.log(sum);
+
+                const html = '<tr><th>'+'開始時間'+starttime2+'</th><td>'+'終了時間'+endtime2+'</td><td>'+'勉強時間'+elapsetime2+'分'+'</td></tr>';  
+                $("#list").append(html);
+                $("#list-2").html(sum+'分');
+            }  
+            
+        });
+    </script>
+    
+</body>
+</html>
+
