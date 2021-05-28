@@ -1,0 +1,14 @@
+dt{
+    float: left;
+    background-color: beige;
+  }
+  
+dd{
+    margin-left: 200px;
+    background-color: aqua;
+    width: 200px;
+  }
+
+#clear{
+    margin-left: 400px;
+}  

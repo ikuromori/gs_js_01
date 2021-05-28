@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <link rel="stylesheet" href="css/style.css">
+
+
+<head>
+  <meta charset="utf-8" />
+  <title>Chatアプリ</title>
+</head>
+
+<body>
+  <!-- コンテンツ表示画面 -->
+
+  <div>
+    <!-- 測定日時 -->
+    測定時間
+    <input type="date" id="date" value="2020-05-18">
+  </div>
+
+  <div>
+    <!-- 測定時間 -->
+    測定時間
+    <input type="time" id="time" value="">
+  </div>
+
+  <div>
+    <!-- 収縮期血圧 -->
+    収縮期血圧
+    <input type="number" id="sbp">
+  </div>
+
+  <div>
+    <!-- 拡張期血圧 -->
+    拡張期血圧
+    <input type="number" id="dbp">
+  </div>　
+
+  <div>
+    <!-- 送信ボタン -->
+    <button id="send">送信</button>
+  </div>
+
+  <div>
+    <!-- 保存されたデータが表示される箇所 -->
+    <div id="output"></div>
+  </div>　　　
+  <div>
+    <!-- 表示ボタン -->
+    <button id="display">表示</button>
+  </div>　　　 
+
+  <div>
+    <!-- グラフが表示される場所 -->
+  <canvas id="myLineChart"></canvas>
+  </div>
+
+  <!--/ コンテンツ表示画面 -->
+
+  <!-- JQuery -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <!-- JQuery -->
+  <!-- chart.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.bundle.js"></script>
+  <!-- chart.js -->
+
+  <!--** 以下Firebase **-->
+  <!-- The core Firebase JS SDK is always required and must be listed first -->
+  <!-- 6.6.1に該当する箇所はfirebaseのバージョンですので更新されるたびに随時変わります🤗 -->
+  <script src="https://www.gstatic.com/firebasejs/8.6.2/firebase.js"></script>
+
+  <!-- TODO: Add SDKs for Firebase products that you want to use
+     https://firebase.google.com/docs/web/setup#config-web-app -->
+
+  <script>
+    // Your web app's Firebase configuration
+    var firebaseConfig = {
+      apiKey: "AIzaSyCpElvfXjWfzajuY5SLQCalB1GxgaFTETM",
+      authDomain: "dev20chat-bfe01.firebaseapp.com",
+      databaseURL: "https://dev20chat-bfe01-default-rtdb.firebaseio.com/",
+      projectId: "dev20chat-bfe01",
+      storageBucket: "dev20chat-bfe01.appspot.com",
+      messagingSenderId: "495165836412",
+      appId: "1:495165836412:web:7bb8b08167290cd04e8df9"
+    };
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+
+
+    //firebaseのデーターベース（保存させる場所）を使いますよ
+    const newPostRef = firebase.database().ref();
+
+    // ここから下にjqueryの処理を書いて練習します
+
+    // 送信ボタンをクリックされたら次の処理をする
+    $("#send").on("click", function () {
+
+      newPostRef.push({
+        date:$("#date").val(),
+        time:$("#time").val(),
+        sbp:$("#sbp").val(),
+        dbp:$("#dbp").val()
+      })
+       $("#date").val("");
+       $("#time").val(""),
+       $("#sbp").val("");
+       $("#dbp").val("");
+    });
+
+    let vdate;
+    let vtime;
+    let vsbp;
+    let vdbp;
+
+    (function () {
+        newPostRef.on("child_added", function (data) {
+        let v = data.val();
+        let k = data.key;
+        vdate = `${v.date}`; 
+        vtime = `${v.time}`; 
+        vsbp = Number(`${v.sbp}`);
+        vdbp = Number(`${v.dbp}`);
+        console.log(vdate, vtime, vsbp, vdbp);    
+        let str = '<div class="flex-container"><dl><dt>'+'日時　'+vdate+'</br>'+'時間　'+vtime+'</dt><dd>'+'収縮期血圧'+vsbp+'</br>'+'拡張期血圧'+vdbp+'</dd></dl><button id="clear" title=${key}>消去</button></div>';
+        $("#output").prepend(str);
+        })
+        $("#dbp").on("keydown", function (e) {
+        // console.log(e, 'eventデータの固まり')
+        if(e.keyCode === 13){
+            newPostRef.push({
+            date:$("#date").val(), 
+            time:$("#time").val(),  
+            sbp:$("#sbp").val(),
+            dbp: $("#dbp").val()
+        })
+        $("#date").val("");
+        $("#time").val("");
+        $("#sbp").val("");
+        $("#dbp").val("");
+        }
+        })
+    }());
+
+    
+  
+
+    // $("#clear").on("child_removed",function(){
+    //   let key = this.title;
+    //   newPostRef.remove(key);
+    // });
+    
+    
+
+    // 　グラフにする 
+    $("#display").on("click", function () {
+        console.log(vdate, vtime, vsbp, vdbp);
+
+    var ctx = document.getElementById("myLineChart");
+    var myLineChart = new Chart(ctx, {
+      // タイプ
+        type: 'line',
+      // 折れ線グラフの作成（ラベルとデータセット）
+        data: {
+          labels: vdate,
+          datasets: [
+                      {
+                        label: '収縮期血圧',
+                        data: vsbp,
+                        borderColor: "rgba(255,0,0,1)",
+                        backgroundColor: "rgba(0,0,0,0)"
+                      },
+                      {
+                        label: '拡張期血圧',
+                        data: vdbp,
+                        borderColor: "rgba(0,0,255,1)",
+                        backgroundColor: "rgba(0,0,0,0)"
+                      }
+                   ],
+           },
+
+      // タイトル
+        options: {
+             title: {
+              display: true,
+              text: '血圧の推移'
+              },
+        scales: {
+               yAxes: [{
+                ticks: {
+                suggestedMax: 200,
+                suggestedMin: 50,
+                stepSize: 10,
+                callback: function(value, index, values){
+                  return  value +  'mmHg'
+                　}
+                }
+               }]
+               },
+        }
+
+    });
+  });
+  </script>
+</body>
+
+</html>
+
+
